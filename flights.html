@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>رحلات اليوم</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header>
+    <h3>شعبة تنسيق الطائرات</h3>
+    <div id="username">مرحباً</div>
+    <button class="logout" onclick="logout()">خروج</button>
+  </header>
+
+  <h2>تسجيل الرحلات</h2>
+  <div id="cards"></div>
+
+  <button class="save" onclick="saveFlights()">💾 حفظ الرحلات</button>
+  <button class="save" onclick="exportToPDF()">📄 تصدير PDF</button>
+
+  <!-- مكتبة jsPDF -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <!-- كود التطبيق -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
