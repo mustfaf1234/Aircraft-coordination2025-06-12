@@ -1,0 +1,119 @@
+/* style.css */
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 10px;
+}
+
+header {
+  background-color: #004080;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+header h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+#username {
+  font-size: 14px;
+}
+
+.logout {
+  background-color: red;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+h2 {
+  text-align: center;
+  color: #004080;
+  margin-top: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.card h4 {
+  margin: 0 0 10px;
+  color: #004080;
+  font-size: 15px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 3px;
+  color: #333;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 6px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+button.save,
+button {
+  background-color: #004080;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
+  transition: 0.3s;
+}
+
+button.save:hover,
+button:hover {
+  background-color: #003060;
+}
+
+.summary {
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+.summary h3 {
+  margin-top: 0;
+  color: #004080;
+}
+
+.flight-details {
+  background: #e9f1ff;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 5px;
+  font-size: 13px;
+}
