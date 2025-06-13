@@ -171,45 +171,80 @@ window.saveFlights = async function () {
 // تصدير إلى PDF
 window.exportToPDF = function () {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 10;
-
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("جدول الرحلات", 105, y, { align: "center" });
-  y += 10;
-
-  const cards = document.querySelectorAll(".card");
-
-  cards.forEach((card, index) => {
-    const inputs = card.querySelectorAll("input, textarea");
-    let isFilled = false;
-    const data = {};
-
-    inputs.forEach((input) => {
-      const value = input.value.trim();
-      data[input.name] = value;
-      if (value !== "") isFilled = true;
-    });
-
-    if (!isFilled) return;
-
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(`الرحلة ${index + 1}:`, 10, y);
-    y += 6;
-
-    for (let key in data) {
-      doc.text(`${key}: ${data[key]}`, 12, y);
-      y += 6;
-    }
-
-    y += 4;
-    if (y > 270) {
-      doc.addPage();
-      y = 10;
-    }
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4"
   });
 
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 15;
+
+  // رأس الصفحة
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 139); // أزرق غامق
+  doc.text("مطار النجف الأشرف الدولي", pageWidth / 2, y, { align: "center" });
+  y += 8;
+  doc.setFontSize(12);
+  doc.text("قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", pageWidth / 2, y, { align: "center" });
+
+  // التاريخ في أعلى اليسار
+  const today = new Date().toLocaleDateString('ar-EG');
+  doc.setFontSize(10);
+  doc.setTextColor(0);
+  doc.text(`التاريخ: ${today}`, 10, 12);
+
+  // إعدادات الجدول
+  y += 10;
+  const headers = [
+    "Date", "FLT.NO", "ON Chocks", "Open Door", "Start Cleaning", "Complete Cleaning",
+    "Ready Boarding", "Start Boarding", "Complete Boarding", "Close Door", "Off Chocks"
+  ];
+  const colWidths = 26;
+  const startX = 10;
+
+  // رسم رأس الجدول
+  headers.forEach((header, i) => {
+    doc.setFillColor(220, 230, 241); // لون خلفية العناوين
+    doc.rect(startX + i * colWidths, y, colWidths, 10, "F");
+    doc.setTextColor(0);
+    doc.setFontSize(9);
+    doc.text(header, startX + i * colWidths + 2, y + 7);
+  });
+
+  y += 11;
+
+  // جلب بيانات الرحلات
+  const cards = document.querySelectorAll(".card");
+  cards.forEach((card, index) => {
+    const inputs = card.querySelectorAll("input");
+    let x = startX;
+
+    inputs.forEach((input, i) => {
+      if (input.name === "notes" || input.name === "name") return; // نخليهم تحت
+      doc.setFontSize(8);
+      doc.text(input.value || "-", x + 2, y + 6);
+      doc.rect(x, y, colWidths, 10);
+      x += colWidths;
+    });
+
+    y += 11;
+  });
+
+  // إضافة الاسم والملاحظات في الأسفل
+  let notes = "";
+  let name = "";
+  const lastCard = cards[0];
+  if (lastCard) {
+    notes = lastCard.querySelector("[name='notes']")?.value || "";
+    name = lastCard.querySelector("[name='name']")?.value || "";
+  }
+
+  doc.setFontSize(10);
+  y += 5;
+  doc.text(`Name: ${name}`, 10, y + 5);
+  doc.text(`Notes: ${notes}`, 10, y + 12);
+
+  // حفظ الملف
   doc.save("flights.pdf");
 };
