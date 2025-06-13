@@ -171,106 +171,103 @@ window.saveFlights = async function () {
 // تصدير إلى PDF
 window.exportToPDF = function () {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: "a4"
+  });
 
-  const today = new Date().toISOString().split("T")[0];
   const user = auth.currentUser;
-  const username = user?.email || "Unknown";
+  if (!user) {
+    alert("User not logged in");
+    return;
+  }
+
+  const date = new Date().toLocaleDateString();
+  const cards = document.querySelectorAll(".card");
 
   // Header
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(0, 0, 255); // Blue
-  doc.text("Najaf International Airport", 148, 12, { align: "center" });
-  doc.text("Apron Operation Section / Aircraft Coordination Unit", 148, 20, { align: "center" });
+  doc.setFontSize(16);
+  doc.text("Najaf International Airport", 148, 15, { align: "center" });
+  doc.setFontSize(12);
+  doc.text("Apron Operations Department / Aircraft Coordination Section", 148, 23, { align: "center" });
 
-  // Date top-left
+  // Date and user
   doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  doc.setFont("helvetica", "normal");
-  doc.text(`Date: ${today}`, 10, 10);
+  doc.text(`Date: ${date}`, 10, 15);
+  doc.text(`User: ${user.email}`, 10, 20);
 
-  const cards = document.querySelectorAll(".card");
-  const tableData = [];
+  const tableHeaders = [
+    "Date", "FLT.NO", "ON chocks", "Open Door", "Start Cleaning",
+    "Complete Cleaning", "Ready Boarding", "Start Boarding",
+    "Complete Boarding", "Close Door", "Off chocks"
+  ];
 
-  cards.forEach((card) => {
-    const data = {};
-    const inputs = card.querySelectorAll("input, textarea");
-    inputs.forEach((input) => {
+  let startY = 30;
+  const rowHeight = 10;
+  const colWidth = 27;
+  const maxRowsPerPage = 5;
+
+  // Draw headers
+  doc.setFontSize(10);
+  tableHeaders.forEach((header, i) => {
+    doc.setFillColor(200, 220, 255);
+    doc.rect(10 + i * colWidth, startY, colWidth, rowHeight, "F");
+    doc.text(header, 10 + i * colWidth + 2, startY + 7);
+  });
+
+  startY += rowHeight;
+
+  let flightIndex = 0;
+
+  cards.forEach((card, idx) => {
+    const inputs = card.querySelectorAll("input");
+    const textarea = card.querySelector("textarea");
+    let data = {};
+
+    inputs.forEach(input => {
       data[input.name] = input.value.trim();
     });
+    data.notes = textarea ? textarea.value.trim() : "";
 
-    if (Object.values(data).some(val => val)) {
-      tableData.push([
-        data.date || "",
-        data.flightNo || "",
-        data.onChocks || "",
-        data.openDoor || "",
-        data.startCleaning || "",
-        data.completeCleaning || "",
-        data.readyBoarding || "",
-        data.startBoarding || "",
-        data.completeBoarding || "",
-        data.closeDoor || "",
-        data.offChocks || ""
-      ]);
+    if (!data.flightNo && !data.date) return; // Skip empty rows
+
+    if (flightIndex >= maxRowsPerPage) {
+      doc.addPage();
+      startY = 30;
+
+      // Redraw headers
+      tableHeaders.forEach((header, i) => {
+        doc.setFillColor(200, 220, 255);
+        doc.rect(10 + i * colWidth, startY, colWidth, rowHeight, "F");
+        doc.text(header, 10 + i * colWidth + 2, startY + 7);
+      });
+
+      startY += rowHeight;
+      flightIndex = 0;
     }
+
+    // Draw data row
+    const values = [
+      data.date || "", data.flightNo || "", data.onChocks || "",
+      data.openDoor || "", data.startCleaning || "", data.completeCleaning || "",
+      data.readyBoarding || "", data.startBoarding || "", data.completeBoarding || "",
+      data.closeDoor || "", data.offChocks || ""
+    ];
+
+    values.forEach((value, i) => {
+      doc.rect(10 + i * colWidth, startY, colWidth, rowHeight);
+      doc.text(value, 10 + i * colWidth + 2, startY + 7);
+    });
+
+    // Notes
+    doc.setFontSize(9);
+    doc.text(`Name: ${data.name || ""}`, 10, startY + rowHeight + 5);
+    doc.text(`Notes: ${data.notes || ""}`, 10, startY + rowHeight + 10);
+
+    startY += rowHeight + 15;
+    flightIndex++;
   });
-
-  const headers = [[
-    "Date",
-    "FLT.NO",
-    "ON Chocks",
-    "Open Door",
-    "Start Cleaning",
-    "Complete Cleaning",
-    "Ready Boarding",
-    "Start Boarding",
-    "Complete Boarding",
-    "Close Door",
-    "Off Chocks"
-  ]];
-
-  // AutoTable
-  doc.autoTable({
-    head: headers,
-    body: tableData,
-    startY: 30,
-    styles: {
-      font: "helvetica",
-      fontSize: 9,
-      cellPadding: 2,
-      overflow: "linebreak"
-    },
-    headStyles: {
-      fillColor: [0, 64, 128],
-      textColor: 255,
-      halign: "center"
-    },
-    columnStyles: {
-      0: { cellWidth: 20 },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 25 },
-      3: { cellWidth: 25 },
-      4: { cellWidth: 25 },
-      5: { cellWidth: 25 },
-      6: { cellWidth: 25 },
-      7: { cellWidth: 25 },
-      8: { cellWidth: 25 },
-      9: { cellWidth: 25 },
-      10: { cellWidth: 25 }
-    }
-  });
-
-  // Footer: Name and Notes
-  const lastY = doc.autoTable.previous.finalY || 30;
-  const firstCard = cards[0];
-  const name = firstCard?.querySelector("[name='name']")?.value.trim() || "";
-  const notes = firstCard?.querySelector("[name='notes']")?.value.trim() || "";
-
-  doc.setFontSize(10);
-  doc.text(`Name: ${name}`, 10, lastY + 12);
-  doc.text(`Notes: ${notes}`, 10, lastY + 20);
 
   doc.save("flights.pdf");
 };
