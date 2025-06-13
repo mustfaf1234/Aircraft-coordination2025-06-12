@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رحلات اليوم</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.1.70/build/pdfmake.min.js"></script>
+  <script src="js/vfs_fonts.js"></script>
+</head>
+<body>
+  <header>
+    <h3>شعبة تنسيق الطائرات</h3>
+    <div id="username">مرحباً</div>
+    <button class="logout" onclick="logout()">خروج</button>
+  </header>
+
+  <main>
+    <h2>تسجيل الرحلات</h2>
+    <div id="cards"></div>
+    <div class="actions">
+      <button class="save" onclick="saveFlights()">💾 حفظ الرحلات</button>
+      <button class="save" onclick="exportToPDF()">📄 تصدير PDF</button>
+    </div>
+    <section id="previous-flights">
+      <h3>الرحلات السابقة</h3>
+      <div id="savedFlightsList"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
