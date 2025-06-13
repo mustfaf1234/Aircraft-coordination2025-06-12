@@ -1,10 +1,13 @@
-// app.js (مُحدث ومصحح تمامًا)
+// app.js (مُحدث)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  getDocs,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
   getAuth,
@@ -45,7 +48,6 @@ window.logout = function () {
   });
 };
 
-// صلاحية المشرف
 const adminEmail = "ahmedaltalqani@gmail.com";
 
 onAuthStateChanged(auth, (user) => {
@@ -63,11 +65,11 @@ onAuthStateChanged(auth, (user) => {
       renderFlightCards();
       restoreCachedFlights();
       setUserNameField();
+      showPreviousFlights();
     }
   }
 });
 
-// إنشاء بطاقات الرحلات
 function renderFlightCards() {
   const fields = [
     { key: 'date', label: 'التاريخ' },
@@ -87,6 +89,7 @@ function renderFlightCards() {
 
   const cardsContainer = document.getElementById("cards");
   if (!cardsContainer) return;
+  cardsContainer.innerHTML = "";
 
   for (let i = 0; i < 5; i++) {
     const card = document.createElement("div");
@@ -154,8 +157,9 @@ window.saveFlights = async function () {
       data[input.name] = value;
       if (value !== "") isFilled = true;
     });
-if (!data.date) continue;
-    if (!isFilled) continue;
+
+    if (!isFilled || !data.date) continue; // الشرط الجديد لحفظ الرحلات التي تحتوي على تاريخ فقط
+
     data.createdBy = user.email;
     data.createdAt = serverTimestamp();
     allData.push(data);
@@ -173,19 +177,14 @@ if (!data.date) continue;
     alert(`✅ تم حفظ ${savedCount} رحلة`);
   } else {
     localStorage.setItem("cachedFlights", JSON.stringify(allData));
-    alert("⚠️ تم حفظ الرحلات مؤقتًا لعدم توفر الاتصال بالإنترنت. سيتم حفظها عند توفر الإنترنت.");
+    alert("⚠️ تم حفظ الرحلات مؤقتًا. سيتم حفظها عند توفر الإنترنت.");
   }
 };
-// تصدير إلى PDF مع دعم اللغة العربية
-window.exportToPDF = async function () {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("يجب تسجيل الدخول");
-    return;
-  }
 
+window.exportToPDF = async function () {
   const date = new Date().toLocaleDateString("ar-EG");
   const cards = document.querySelectorAll(".card");
+
   const flights = [];
 
   cards.forEach((card) => {
@@ -204,27 +203,26 @@ window.exportToPDF = async function () {
   ];
 
   const tableBody = [tableHeader, ...flights.map(f => f.slice(0, 11))];
-
   const name = flights[0][11] || "-";
   const notes = flights[0][12] || "-";
 
   const docDefinition = {
     pageOrientation: "landscape",
     content: [
-      { text: `التاريخ: ${date}`, alignment: "right", margin: [0, 0, 0, 10] },
+      { text: `التاريخ: ${date}`, alignment: "right" },
       { text: "مطار النجف الأشرف الدولي", alignment: "center", fontSize: 16, bold: true },
-      { text: "قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", alignment: "center", margin: [0, 0, 0, 20], color: '#004080' },
+      { text: "قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", alignment: "center", margin: [0, 0, 0, 20] },
       {
         table: {
           headerRows: 1,
           widths: Array(11).fill('*'),
-          body: tableBody,
+          body: tableBody
         },
         layout: 'lightHorizontalLines',
-        margin: [0, 0, 0, 20],
+        margin: [0, 0, 0, 20]
       },
-      { text: `الاسم: ${name}`, margin: [0, 0, 0, 5], alignment: "right" },
-      { text: `ملاحظات: ${notes}`, alignment: "right" },
+      { text: `الاسم: ${name}`, alignment: "right" },
+      { text: `ملاحظات: ${notes}`, alignment: "right" }
     ],
     defaultStyle: {
       alignment: "right"
@@ -233,3 +231,22 @@ window.exportToPDF = async function () {
 
   pdfMake.createPdf(docDefinition).download("flights.pdf");
 };
+
+// عرض الرحلات السابقة
+async function showPreviousFlights() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const q = query(collection(db, "flights"), where("createdBy", "==", user.email));
+  const querySnapshot = await getDocs(q);
+
+  const container = document.getElementById("savedFlightsList");
+  if (!container) return;
+
+  let html = "";
+  querySnapshot.forEach((doc) => {
+    const flight = doc.data();
+    html += `<div class="prev-flight">📌 ${flight.date || "تاريخ غير معروف"} - ${flight.flightNo || "بدون رقم"}</div>`;
+  });
+  container.innerHTML = html;
+}
