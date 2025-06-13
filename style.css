@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 10px;
+  direction: rtl;
+}
+.login-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 400px;
+  margin: auto;
+}
+.card {
+  background: #fff;
+  border: 1px solid #ccc;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 6px;
+}
+.actions {
+  margin-top: 20px;
+}
+.save {
+  padding: 8px 15px;
+  margin: 5px;
+}
