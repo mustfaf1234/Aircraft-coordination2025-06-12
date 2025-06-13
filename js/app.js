@@ -177,7 +177,7 @@ window.exportToPDF = async function () {
   }
 
   const date = new Date().toLocaleDateString("ar-EG");
-  const cards = document.querySelectorAll(".flight-card");
+  const cards = document.querySelectorAll(".card");
 
   const flights = [];
 
