@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>رحلات اليوم</title>
   <link rel="stylesheet" href="css/style.css">
-<!-- مكتبة pdfMake -->
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
-
+  <!-- مكتبة pdfMake -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
 </head>
 <body>
 
@@ -24,8 +22,23 @@
 
   <button class="save" onclick="saveFlights()">💾 حفظ الرحلات</button>
   <button class="save" onclick="exportToPDF()">📄 تصدير PDF</button>
-<!-- مكتبة pdfMake -->
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/pdfmake.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/pdfmake@0.2.7/build/vfs_fonts.js"></script>
+
+  <!-- سكربت التطبيق -->
+  <script type="module" src="js/app.js"></script>
+  <script>
+    // منع المستخدم من تعديل الاسم بعد حفظه أول مرة
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedName = localStorage.getItem("fixedName");
+      if (!savedName) {
+        const name = prompt("يرجى إدخال اسمك الكامل:");
+        if (name && name.trim() !== "") {
+          localStorage.setItem("fixedName", name.trim());
+        } else {
+          alert("الاسم إجباري ولا يمكن تركه فارغًا.");
+          location.reload();
+        }
+      }
+    });
+  </script>
 </body>
 </html>
