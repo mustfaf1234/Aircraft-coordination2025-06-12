@@ -1,10 +1,16 @@
-// app.js
+// app.js (محدث كاملًا)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
-  getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
-  getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
 const firebaseConfig = {
@@ -20,36 +26,41 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-window.login = async () => {
+window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   try {
     await signInWithEmailAndPassword(auth, email, password);
     window.location.href = "flights.html";
-  } catch (err) {
-    alert("فشل تسجيل الدخول: " + err.message);
+  } catch (error) {
+    alert("فشل تسجيل الدخول: " + error.message);
   }
 };
 
-window.logout = () => {
-  signOut(auth).then(() => window.location.href = "index.html");
+window.logout = function () {
+  signOut(auth).then(() => {
+    window.location.href = "index.html";
+  });
 };
 
 const adminEmail = "ahmedaltalqani@gmail.com";
 
-onAuthStateChanged(auth, async user => {
-  if (!user) return window.location.href = "index.html";
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+  } else {
+    const usernameEl = document.getElementById("username");
+    if (usernameEl) usernameEl.textContent = user.email;
 
-  document.getElementById("username")?.textContent = user.email;
+    if (user.email === adminEmail && window.location.pathname.includes("flights.html")) {
+      window.location.href = "admin.html";
+    }
 
-  if (user.email === adminEmail && location.pathname.endsWith("flights.html")) {
-    return location.href = "admin.html";
-  }
-
-  if (location.pathname.endsWith("flights.html")) {
-    renderFlightCards();
-    await loadPreviousFlights();
-    setUserNameField();
+    if (window.location.pathname.includes("flights.html")) {
+      renderFlightCards();
+      restoreCachedFlights();
+      setUserNameField();
+    }
   }
 });
 
@@ -70,105 +81,116 @@ function renderFlightCards() {
     { key: 'notes', label: 'ملاحظات', type: 'textarea' }
   ];
 
-  const cards = document.getElementById("cards");
-  cards.innerHTML = "";
+  const cardsContainer = document.getElementById("cards");
+  if (!cardsContainer) return;
+
   for (let i = 0; i < 5; i++) {
     const card = document.createElement("div");
     card.className = "card";
     card.innerHTML = `<h4>الرحلة ${i + 1}</h4>`;
-    fields.forEach(f => {
-      const g = document.createElement("div");
-      g.className = "form-group";
-      const lbl = document.createElement("label");
-      lbl.textContent = f.label;
-      const inp = f.type === "textarea" ? document.createElement("textarea") : document.createElement("input");
-      inp.name = f.key;
-      if (f.key === "name") inp.readOnly = true;
-      g.append(lbl, inp);
-      card.appendChild(g);
+
+    fields.forEach(field => {
+      const group = document.createElement("div");
+      group.className = "form-group";
+      const label = document.createElement("label");
+      label.textContent = field.label;
+      const input = field.type === 'textarea' ? document.createElement("textarea") : document.createElement("input");
+      input.name = field.key;
+      input.dataset.row = i;
+      if (field.key === 'name') input.readOnly = true;
+      group.appendChild(label);
+      group.appendChild(input);
+      card.appendChild(group);
     });
-    cards.appendChild(card);
+
+    cardsContainer.appendChild(card);
   }
 }
 
 function setUserNameField() {
-  let name = localStorage.getItem("userFullName");
-  if (!name) {
-    name = prompt("الرجاء إدخال اسمك الكامل:");
+  const storedName = localStorage.getItem("userFullName");
+  if (!storedName) {
+    const name = prompt("الرجاء إدخال اسمك الكامل:");
     if (name) localStorage.setItem("userFullName", name);
   }
-  document.querySelectorAll("input[name='name']").forEach(i => {
-    i.value = name || "";
-    i.readOnly = true;
+  const nameInputs = document.querySelectorAll("input[name='name']");
+  nameInputs.forEach(input => {
+    input.value = localStorage.getItem("userFullName") || "";
+    input.readOnly = true;
   });
 }
 
-async function loadPreviousFlights() {
-  const flightRef = collection(db, "flights");
-  const snap = await getDocs(query(flightRef, where("createdBy", "==", auth.currentUser.email)));
-  const container = document.getElementById("savedFlightsList");
-  container.innerHTML = "";
-  snap.forEach(d => {
-    const dt = d.data();
-    container.innerHTML += `<div class="flight-item">
-      <strong>${dt.date} - ${dt.flightNo}</strong><br>
-      ملاحظات: ${dt.notes || "-"}
-    </div>`;
+function restoreCachedFlights() {
+  const cachedData = localStorage.getItem("cachedFlights");
+  if (!cachedData) return;
+  const parsed = JSON.parse(cachedData);
+  parsed.forEach((entry, index) => {
+    for (const key in entry) {
+      const input = document.querySelector(`.card:nth-child(${index + 1}) [name='${key}']`);
+      if (input) input.value = entry[key];
+    }
   });
 }
 
-window.saveFlights = async () => {
+window.saveFlights = async function () {
+  const user = auth.currentUser;
+  if (!user) return;
+
   const cards = document.querySelectorAll(".card");
+  let savedCount = 0;
   const allData = [];
-  let saved = 0;
 
-  cards.forEach(c => {
-    const data = {}, inputs = c.querySelectorAll("input,textarea");
-    let hasDate = false;
-    inputs.forEach(i => {
-      data[i.name] = i.value.trim();
-      if (i.name === "date" && i.value.trim()) hasDate = true;
+  for (let card of cards) {
+    const inputs = card.querySelectorAll("input, textarea");
+    const data = {};
+    let isFilled = false;
+
+    inputs.forEach((input) => {
+      const value = input.value.trim();
+      data[input.name] = value;
+      if (value !== "") isFilled = true;
     });
-    if (hasDate) allData.push(data);
-  });
 
-  for (const d of allData) {
-    d.createdBy = auth.currentUser.email;
-    d.createdAt = serverTimestamp();
-    try { await addDoc(collection(db, "flights"), d); saved++; }
-    catch(e){ console.error(e); }
+    if (!data.date) continue;
+    data.createdBy = user.email;
+    data.createdAt = serverTimestamp();
+    allData.push(data);
+
+    try {
+      await addDoc(collection(db, "flights"), data);
+      savedCount++;
+    } catch (err) {
+      console.error("فشل في الحفظ:", err);
+    }
   }
 
-  if (saved) {
-    alert(`✅ تم حفظ ${saved} رحلة`);
-    loadPreviousFlights();
-  } else alert("⚠️ لا توجد رحلات تحتوي على تاريخ للحفظ");
+  if (savedCount > 0) {
+    localStorage.removeItem("cachedFlights");
+    alert(`✅ تم حفظ ${savedCount} رحلة`);
+  } else {
+    localStorage.setItem("cachedFlights", JSON.stringify(allData));
+    alert("⚠️ لم يتم حفظ أي رحلة بدون تاريخ.");
+  }
 };
 
-window.exportToPDF = () => {
-  const date = new Date().toLocaleDateString("ar-EG");
-  const rows = [["التاريخ","رقم الرحلة","ON chocks","Open Door","Start Cleaning","Complete Cleaning","Ready Boarding","Start Boarding","Complete Boarding","Close Door","Off chocks"]];
-  document.querySelectorAll(".card").forEach(c => {
-    const vals = Array.from(c.querySelectorAll("input,textarea")).map(i => i.value || "-");
-    if (vals[0].trim()) rows.push(vals.slice(0,11));
-  });
-  const name = localStorage.getItem("userFullName") || "-";
-  const notes = document.querySelector(".card textarea[name='notes']")?.value || "-";
+// دالة التصدير إلى PDF
+window.exportToPDF = function () {
+  const cards = document.querySelectorAll(".card");
+  const content = [];
 
-  pdfMake.createPdf({
-    pageOrientation: "landscape",
-    content:[
-      {text:`التاريخ: ${date}`, alignment:"right"},
-      {text:"مطار النجف الأشرف الدولي", style:"header", alignment:"center"},
-      {text:"قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", style:"subheader", alignment:"center"},
-      {table:{ headerRows:1, body:rows }, layout:"lightHorizontalLines"},
-      {text:`الاسم: ${name}`, margin:[0,10,0,0], alignment:"right"},
-      {text:`ملاحظات: ${notes}`, alignment:"right"},
-    ],
-    styles:{
-      header:{fontSize:16,bold:true},
-      subheader:{fontSize:12,color:"#004080"}
-    },
-    defaultStyle:{ alignment:"right", font: "Amiri" }
-  }).download("flights.pdf");
+  cards.forEach((card, index) => {
+    const inputs = card.querySelectorAll("input, textarea");
+    const data = Array.from(inputs).map(input => `${input.name}: ${input.value}`);
+    content.push({ text: `الرحلة ${index + 1}\n${data.join("\n")}`, margin: [0, 0, 0, 10] });
+  });
+
+  const docDefinition = {
+    content,
+    defaultStyle: {
+      font: "Amiri",
+      alignment: "right"
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).download("رحلات_اليوم.pdf");
 };
