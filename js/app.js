@@ -169,105 +169,60 @@ window.saveFlights = async function () {
 };
 
 // تصدير إلى PDF
-window.exportToPDF = function () {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({
-    orientation: "landscape",
-    unit: "mm",
-    format: "a4"
-  });
-
+window.exportToPDF = async function () {
   const user = auth.currentUser;
   if (!user) {
     alert("User not logged in");
     return;
   }
 
-  const date = new Date().toLocaleDateString();
-  const cards = document.querySelectorAll(".card");
+  const date = new Date().toLocaleDateString("ar-EG");
+  const cards = document.querySelectorAll(".flight-card");
 
-  // Header
-  doc.setFontSize(16);
-  doc.text("Najaf International Airport", 148, 15, { align: "center" });
-  doc.setFontSize(12);
-  doc.text("Apron Operations Department / Aircraft Coordination Section", 148, 23, { align: "center" });
+  const flights = [];
 
-  // Date and user
-  doc.setFontSize(10);
-  doc.text(`Date: ${date}`, 10, 15);
-  doc.text(`User: ${user.email}`, 10, 20);
+  cards.forEach((card) => {
+    const fields = card.querySelectorAll("input, textarea");
+    const flight = [];
+    fields.forEach((input) => {
+      flight.push(input.value || "-");
+    });
+    flights.push(flight);
+  });
 
-  const tableHeaders = [
-    "Date", "FLT.NO", "ON chocks", "Open Door", "Start Cleaning",
+  const tableHeader = [
+    "Date", "FLT.NO", "ON Chocks", "Open Door", "Start Cleaning",
     "Complete Cleaning", "Ready Boarding", "Start Boarding",
-    "Complete Boarding", "Close Door", "Off chocks"
+    "Complete Boarding", "Close Door", "Off Chocks"
   ];
 
-  let startY = 30;
-  const rowHeight = 10;
-  const colWidth = 27;
-  const maxRowsPerPage = 5;
+  const tableBody = [tableHeader, ...flights.map(f => f.slice(0, 11))];
 
-  // Draw headers
-  doc.setFontSize(10);
-  tableHeaders.forEach((header, i) => {
-    doc.setFillColor(200, 220, 255);
-    doc.rect(10 + i * colWidth, startY, colWidth, rowHeight, "F");
-    doc.text(header, 10 + i * colWidth + 2, startY + 7);
-  });
+  const name = flights[0][11] || "-";
+  const notes = flights[0][12] || "-";
 
-  startY += rowHeight;
+  const docDefinition = {
+    pageOrientation: "landscape",
+    content: [
+      { text: `Date: ${date}`, alignment: "left", margin: [0, 0, 0, 10] },
+      { text: "Najaf International Airport", alignment: "center", fontSize: 16, bold: true },
+      { text: "Apron Operations Department / Aircraft Coordination Section", alignment: "center", margin: [0, 0, 0, 20], color: '#004080' },
+      {
+        table: {
+          headerRows: 1,
+          widths: Array(11).fill('*'),
+          body: tableBody,
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 20],
+      },
+      { text: `Name: ${name}`, margin: [0, 0, 0, 5] },
+      { text: `Notes: ${notes}` },
+    ],
+    defaultStyle: {
+      font: "Helvetica",
+    },
+  };
 
-  let flightIndex = 0;
-
-  cards.forEach((card, idx) => {
-    const inputs = card.querySelectorAll("input");
-    const textarea = card.querySelector("textarea");
-    let data = {};
-
-    inputs.forEach(input => {
-      data[input.name] = input.value.trim();
-    });
-    data.notes = textarea ? textarea.value.trim() : "";
-
-    if (!data.flightNo && !data.date) return; // Skip empty rows
-
-    if (flightIndex >= maxRowsPerPage) {
-      doc.addPage();
-      startY = 30;
-
-      // Redraw headers
-      tableHeaders.forEach((header, i) => {
-        doc.setFillColor(200, 220, 255);
-        doc.rect(10 + i * colWidth, startY, colWidth, rowHeight, "F");
-        doc.text(header, 10 + i * colWidth + 2, startY + 7);
-      });
-
-      startY += rowHeight;
-      flightIndex = 0;
-    }
-
-    // Draw data row
-    const values = [
-      data.date || "", data.flightNo || "", data.onChocks || "",
-      data.openDoor || "", data.startCleaning || "", data.completeCleaning || "",
-      data.readyBoarding || "", data.startBoarding || "", data.completeBoarding || "",
-      data.closeDoor || "", data.offChocks || ""
-    ];
-
-    values.forEach((value, i) => {
-      doc.rect(10 + i * colWidth, startY, colWidth, rowHeight);
-      doc.text(value, 10 + i * colWidth + 2, startY + 7);
-    });
-
-    // Notes
-    doc.setFontSize(9);
-    doc.text(`Name: ${data.name || ""}`, 10, startY + rowHeight + 5);
-    doc.text(`Notes: ${data.notes || ""}`, 10, startY + rowHeight + 10);
-
-    startY += rowHeight + 15;
-    flightIndex++;
-  });
-
-  doc.save("flights.pdf");
+  pdfMake.createPdf(docDefinition).download("flights.pdf");
 };
