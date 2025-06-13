@@ -173,52 +173,51 @@ window.exportToPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  // Get today's date
   const today = new Date().toISOString().split("T")[0];
-
-  // Get user and flight data
   const user = auth.currentUser;
   const username = user?.email || "Unknown";
 
-  // Header text
+  // Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 255); // Blue
   doc.text("Najaf International Airport", 148, 12, { align: "center" });
   doc.text("Apron Operation Section / Aircraft Coordination Unit", 148, 20, { align: "center" });
 
-  // Date (Top left)
+  // Date top-left
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "normal");
   doc.text(`Date: ${today}`, 10, 10);
 
   const cards = document.querySelectorAll(".card");
   const tableData = [];
 
-  cards.forEach((card, index) => {
+  cards.forEach((card) => {
+    const data = {};
     const inputs = card.querySelectorAll("input, textarea");
-    const row = {};
     inputs.forEach((input) => {
-      row[input.name] = input.value.trim();
+      data[input.name] = input.value.trim();
     });
-    if (Object.values(row).some(val => val)) {
+
+    if (Object.values(data).some(val => val)) {
       tableData.push([
-        row.date || "",
-        row.flightNo || "",
-        row.onChocks || "",
-        row.openDoor || "",
-        row.startCleaning || "",
-        row.completeCleaning || "",
-        row.readyBoarding || "",
-        row.startBoarding || "",
-        row.completeBoarding || "",
-        row.closeDoor || "",
-        row.offChocks || ""
+        data.date || "",
+        data.flightNo || "",
+        data.onChocks || "",
+        data.openDoor || "",
+        data.startCleaning || "",
+        data.completeCleaning || "",
+        data.readyBoarding || "",
+        data.startBoarding || "",
+        data.completeBoarding || "",
+        data.closeDoor || "",
+        data.offChocks || ""
       ]);
     }
   });
 
-  const tableHeaders = [[
+  const headers = [[
     "Date",
     "FLT.NO",
     "ON Chocks",
@@ -232,9 +231,9 @@ window.exportToPDF = function () {
     "Off Chocks"
   ]];
 
-  // Add table
+  // AutoTable
   doc.autoTable({
-    head: tableHeaders,
+    head: headers,
     body: tableData,
     startY: 30,
     styles: {
@@ -263,16 +262,15 @@ window.exportToPDF = function () {
     }
   });
 
-  // Name and Notes at bottom
+  // Footer: Name and Notes
   const lastY = doc.autoTable.previous.finalY || 30;
-  const lastCard = cards[0]; // Assuming same user for 5 flights
-  const name = lastCard?.querySelector("[name='name']")?.value.trim() || "";
-  const notes = lastCard?.querySelector("[name='notes']")?.value.trim() || "";
+  const firstCard = cards[0];
+  const name = firstCard?.querySelector("[name='name']")?.value.trim() || "";
+  const notes = firstCard?.querySelector("[name='notes']")?.value.trim() || "";
 
-  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(`Name: ${name}`, 10, lastY + 10);
-  doc.text(`Notes: ${notes}`, 10, lastY + 18);
+  doc.text(`Name: ${name}`, 10, lastY + 12);
+  doc.text(`Notes: ${notes}`, 10, lastY + 20);
 
   doc.save("flights.pdf");
 };
