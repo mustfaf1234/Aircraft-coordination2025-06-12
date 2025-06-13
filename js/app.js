@@ -173,79 +173,106 @@ window.exportToPDF = function () {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  // البيانات النموذجية للرحلات
-  const flights = [
-    {
-      date: "2025-06-11", flightNo: "IA123", onChocks: "10:00", openDoor: "10:05", startCleaning: "10:10",
-      completeCleaning: "10:30", readyBoarding: "10:40", startBoarding: "10:45", completeBoarding: "11:00",
-      closeDoor: "11:10", offChocks: "11:20"
-    },
-    {
-      date: "2025-06-11", flightNo: "QR456", onChocks: "12:00", openDoor: "12:05", startCleaning: "12:10",
-      completeCleaning: "12:25", readyBoarding: "12:40", startBoarding: "12:50", completeBoarding: "13:00",
-      closeDoor: "13:05", offChocks: "13:15"
-    },
-    {
-      date: "2025-06-11", flightNo: "EK789", onChocks: "14:00", openDoor: "14:10", startCleaning: "14:15",
-      completeCleaning: "14:35", readyBoarding: "14:50", startBoarding: "15:00", completeBoarding: "15:20",
-      closeDoor: "15:25", offChocks: "15:35"
-    },
-    {
-      date: "2025-06-11", flightNo: "BA987", onChocks: "16:00", openDoor: "16:05", startCleaning: "16:10",
-      completeCleaning: "16:30", readyBoarding: "16:45", startBoarding: "16:50", completeBoarding: "17:00",
-      closeDoor: "17:05", offChocks: "17:15"
-    },
-    {
-      date: "2025-06-11", flightNo: "LH321", onChocks: "18:00", openDoor: "18:05", startCleaning: "18:15",
-      completeCleaning: "18:35", readyBoarding: "18:45", startBoarding: "18:50", completeBoarding: "19:10",
-      closeDoor: "19:15", offChocks: "19:25"
-    }
-  ];
+  // Get today's date
+  const today = new Date().toISOString().split("T")[0];
 
-  const headers = [
-    "Date", "FLT.NO", "ON Chocks", "Open Door", "Start Cleaning",
-    "Complete Cleaning", "Ready Boarding", "Start Boarding",
-    "Complete Boarding", "Close Door", "Off Chocks"
-  ];
+  // Get user and flight data
+  const user = auth.currentUser;
+  const username = user?.email || "Unknown";
 
-  // إعداد العنوان
+  // Header text
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.text("AL-NAJAF AL-ASHRAF INTERNATIONAL AIRPORT", 148, 15, { align: "center" });
+  doc.setFontSize(14);
+  doc.setTextColor(0, 0, 255); // Blue
+  doc.text("Najaf International Airport", 148, 12, { align: "center" });
+  doc.text("Apron Operation Section / Aircraft Coordination Unit", 148, 20, { align: "center" });
 
+  // Date (Top left)
   doc.setFontSize(10);
-  doc.setTextColor(0, 102, 204);
-  doc.text("Apron Operations Department / Aircraft Coordination Unit", 148, 22, { align: "center" });
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Date: ${today}`, 10, 10);
 
-  doc.setTextColor(0);
-  doc.setFontSize(9);
+  const cards = document.querySelectorAll(".card");
+  const tableData = [];
 
-  // رأس الجدول
-  const startX = 10;
-  const startY = 30;
-  const rowHeight = 8;
-  const colWidth = 27;
-
-  headers.forEach((header, i) => {
-    doc.rect(startX + i * colWidth, startY, colWidth, rowHeight);
-    doc.text(header, startX + i * colWidth + 1, startY + 5);
-  });
-
-  // بيانات الرحلات
-  flights.forEach((flight, rowIndex) => {
-    const rowY = startY + rowHeight * (rowIndex + 1);
-    const values = Object.values(flight);
-    values.forEach((val, colIndex) => {
-      doc.rect(startX + colIndex * colWidth, rowY, colWidth, rowHeight);
-      doc.text(String(val), startX + colIndex * colWidth + 1, rowY + 5);
+  cards.forEach((card, index) => {
+    const inputs = card.querySelectorAll("input, textarea");
+    const row = {};
+    inputs.forEach((input) => {
+      row[input.name] = input.value.trim();
     });
+    if (Object.values(row).some(val => val)) {
+      tableData.push([
+        row.date || "",
+        row.flightNo || "",
+        row.onChocks || "",
+        row.openDoor || "",
+        row.startCleaning || "",
+        row.completeCleaning || "",
+        row.readyBoarding || "",
+        row.startBoarding || "",
+        row.completeBoarding || "",
+        row.closeDoor || "",
+        row.offChocks || ""
+      ]);
+    }
   });
 
-  // خانات الاسم والملاحظات
-  const endY = startY + rowHeight * (flights.length + 1) + 10;
-  doc.text("Name:", 10, endY);
-  doc.text("Notes:", 10, endY + 7);
+  const tableHeaders = [[
+    "Date",
+    "FLT.NO",
+    "ON Chocks",
+    "Open Door",
+    "Start Cleaning",
+    "Complete Cleaning",
+    "Ready Boarding",
+    "Start Boarding",
+    "Complete Boarding",
+    "Close Door",
+    "Off Chocks"
+  ]];
 
-  // حفظ
-  doc.save("flight_schedule.pdf");
+  // Add table
+  doc.autoTable({
+    head: tableHeaders,
+    body: tableData,
+    startY: 30,
+    styles: {
+      font: "helvetica",
+      fontSize: 9,
+      cellPadding: 2,
+      overflow: "linebreak"
+    },
+    headStyles: {
+      fillColor: [0, 64, 128],
+      textColor: 255,
+      halign: "center"
+    },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 25 },
+      3: { cellWidth: 25 },
+      4: { cellWidth: 25 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 25 },
+      7: { cellWidth: 25 },
+      8: { cellWidth: 25 },
+      9: { cellWidth: 25 },
+      10: { cellWidth: 25 }
+    }
+  });
+
+  // Name and Notes at bottom
+  const lastY = doc.autoTable.previous.finalY || 30;
+  const lastCard = cards[0]; // Assuming same user for 5 flights
+  const name = lastCard?.querySelector("[name='name']")?.value.trim() || "";
+  const notes = lastCard?.querySelector("[name='notes']")?.value.trim() || "";
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.text(`Name: ${name}`, 10, lastY + 10);
+  doc.text(`Notes: ${notes}`, 10, lastY + 18);
+
+  doc.save("flights.pdf");
 };
