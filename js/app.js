@@ -66,6 +66,7 @@ onAuthStateChanged(auth, (user) => {
     if (window.location.pathname.includes("flights.html")) {
       renderFlightCards();
       restoreCachedFlights();
+      setUserNameField();
     }
   }
 });
@@ -104,6 +105,7 @@ function renderFlightCards() {
       const input = field.type === 'textarea' ? document.createElement("textarea") : document.createElement("input");
       input.name = field.key;
       input.dataset.row = i;
+      if (field.key === 'name') input.readOnly = true;
       group.appendChild(label);
       group.appendChild(input);
       card.appendChild(group);
@@ -111,6 +113,20 @@ function renderFlightCards() {
 
     cardsContainer.appendChild(card);
   }
+}
+
+// تعيين حقل الاسم من localStorage
+function setUserNameField() {
+  const storedName = localStorage.getItem("userFullName");
+  if (!storedName) {
+    const name = prompt("الرجاء إدخال اسمك الكامل:");
+    if (name) localStorage.setItem("userFullName", name);
+  }
+  const nameInputs = document.querySelectorAll("input[name='name']");
+  nameInputs.forEach(input => {
+    input.value = localStorage.getItem("userFullName") || "";
+    input.readOnly = true;
+  });
 }
 
 // استرجاع الحقول من التخزين المؤقت
@@ -191,6 +207,56 @@ window.exportToPDF = async function () {
   });
 
   const tableHeader = [
+    "التاريخ", "رقم الرحلة", "وقت وضع العجلات", "فتح الباب", "بدء التنظيف",
+    "إكمال التنظيف", "جاهزية الصعود", "بدء الصعود", "إكمال الصعود",
+    "إغلاق الباب", "إقلاع العجلات"
+  ];
+
+  const tableBody = [tableHeader, ...flights.map(f => f.slice(0, 11))];
+
+  const name = flights[0][11] || "-";
+  const notes = flights[0][12] || "-";
+
+  const docDefinition = {
+    pageOrientation: "landscape",
+    content: [
+      { text: `التاريخ: ${date}`, alignment: "right", margin: [0, 0, 0, 10] },
+      { text: "مطار النجف الأشرف الدولي", alignment: "center", fontSize: 16, bold: true },
+      { text: "قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", alignment: "center", margin: [0, 0, 0, 20], color: '#004080' },
+      {
+        table: {
+          headerRows: 1,
+          widths: Array(11).fill('*'),
+          body: tableBody,
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 20],
+      },
+      { text: `الاسم: ${name}`, margin: [0, 0, 0, 5], alignment: "right" },
+      { text: `ملاحظات: ${notes}`, alignment: "right" },
+    ],
+    defaultStyle: {
+      alignment: "right",
+    }
+  };
+
+  pdfMake.createPdf(docDefinition).download("flights.pdf");
+};
+  const date = new Date().toLocaleDateString("ar-EG");
+  const cards = document.querySelectorAll(".card");
+
+  const flights = [];
+
+  cards.forEach((card) => {
+    const fields = card.querySelectorAll("input, textarea");
+    const flight = [];
+    fields.forEach((input) => {
+      flight.push(input.value || "-");
+    });
+    flights.push(flight);
+  });
+
+  const tableHeader = [
     "Date", "FLT.NO", "ON Chocks", "Open Door", "Start Cleaning",
     "Complete Cleaning", "Ready Boarding", "Start Boarding",
     "Complete Boarding", "Close Door", "Off Chocks"
@@ -198,7 +264,7 @@ window.exportToPDF = async function () {
 
   const tableBody = [tableHeader, ...flights.map(f => f.slice(0, 11))];
 
-  const name = flights[0][11] || "-";
+  const name = localStorage.getItem("userFullName") || "-";
   const notes = flights[0][12] || "-";
 
   const docDefinition = {
@@ -226,3 +292,4 @@ window.exportToPDF = async function () {
 
   pdfMake.createPdf(docDefinition).download("flights.pdf");
 };
+
