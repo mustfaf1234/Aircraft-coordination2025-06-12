@@ -26,7 +26,7 @@ function renderFlightCards() { const fields = [ { key: 'date', label: 'التا�
 
 const cardsContainer = document.getElementById("cards"); if (!cardsContainer) return;
 
-for (let i = 0; i < 5; i++) { const card = document.createElement("div"); card.className = "card"; card.innerHTML = <h4>الرحلة ${i + 1}</h4>;
+for (let i = 0; i < 5; i++) { const card = document.createElement("div"); card.className = "card"; card.innerHTML = `<h4>الرحلة ${i + 1}</h4>`;
 
 fields.forEach(field => {
   const group = document.createElement("div");
