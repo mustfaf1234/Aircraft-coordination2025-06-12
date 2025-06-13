@@ -1,28 +1,47 @@
+<!-- style.css (تنسيق الواجهة) -->
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
+  font-family: 'Tahoma', sans-serif;
+  background: #f4f4f4;
   margin: 0;
-  padding: 10px;
-  direction: rtl;
+  padding: 0;
 }
-.login-box {
-  background: white;
+header, footer {
+  background-color: #004080;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
+.login-box, .actions, #cards, #savedFlightsList, #allFlightsList, #monthlyCounts {
   padding: 20px;
-  border-radius: 8px;
-  max-width: 400px;
   margin: auto;
+  max-width: 600px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+input, textarea, button {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+button.save {
+  background-color: #008000;
+  color: white;
+  border: none;
 }
 .card {
-  background: #fff;
-  border: 1px solid #ccc;
-  margin: 10px 0;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+}
+.flight-item {
+  background: #f9f9f9;
   padding: 10px;
   border-radius: 6px;
-}
-.actions {
-  margin-top: 20px;
-}
-.save {
-  padding: 8px 15px;
-  margin: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
 }
