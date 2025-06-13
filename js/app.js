@@ -154,7 +154,7 @@ window.saveFlights = async function () {
       data[input.name] = value;
       if (value !== "") isFilled = true;
     });
-
+if (!data.date) continue;
     if (!isFilled) continue;
     data.createdBy = user.email;
     data.createdAt = serverTimestamp();
