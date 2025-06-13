@@ -180,13 +180,12 @@ if (!data.date) continue;
 window.exportToPDF = async function () {
   const user = auth.currentUser;
   if (!user) {
-    alert("لم يتم تسجيل الدخول");
+    alert("يجب تسجيل الدخول");
     return;
   }
 
   const date = new Date().toLocaleDateString("ar-EG");
   const cards = document.querySelectorAll(".card");
-
   const flights = [];
 
   cards.forEach((card) => {
@@ -206,13 +205,13 @@ window.exportToPDF = async function () {
 
   const tableBody = [tableHeader, ...flights.map(f => f.slice(0, 11))];
 
-  const name = localStorage.getItem("userFullName") || "-";
+  const name = flights[0][11] || "-";
   const notes = flights[0][12] || "-";
 
   const docDefinition = {
     pageOrientation: "landscape",
     content: [
-      { text: `📅 التاريخ: ${date}`, alignment: "right", margin: [0, 0, 0, 10] },
+      { text: `التاريخ: ${date}`, alignment: "right", margin: [0, 0, 0, 10] },
       { text: "مطار النجف الأشرف الدولي", alignment: "center", fontSize: 16, bold: true },
       { text: "قسم عمليات ساحة الطيران / شعبة تنسيق الطائرات", alignment: "center", margin: [0, 0, 0, 20], color: '#004080' },
       {
@@ -224,22 +223,11 @@ window.exportToPDF = async function () {
         layout: 'lightHorizontalLines',
         margin: [0, 0, 0, 20],
       },
-      { text: `👤 الاسم: ${name}`, margin: [0, 0, 0, 5], alignment: "right" },
-      { text: `📝 ملاحظات: ${notes}`, alignment: "right" },
+      { text: `الاسم: ${name}`, margin: [0, 0, 0, 5], alignment: "right" },
+      { text: `ملاحظات: ${notes}`, alignment: "right" },
     ],
     defaultStyle: {
-      font: "Amiri",
       alignment: "right"
-    }
-  };
-
-  // دعم اللغة العربية - تحميل خط Amiri
-  pdfMake.fonts = {
-    Amiri: {
-      normal: "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@0.0.4/fonts/amiri/Amiri-Regular.ttf",
-      bold: "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@0.0.4/fonts/amiri/Amiri-Bold.ttf",
-      italics: "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@0.0.4/fonts/amiri/Amiri-Italic.ttf",
-      bolditalics: "https://cdn.jsdelivr.net/npm/@pdf-lib/fontkit@0.0.4/fonts/amiri/Amiri-BoldItalic.ttf"
     }
   };
 
