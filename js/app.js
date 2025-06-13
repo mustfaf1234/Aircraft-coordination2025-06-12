@@ -1,4 +1,3 @@
-// app.js (محدث كاملًا)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -13,6 +12,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
+// إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCqOK8dAsYVd3G5kv6rFbrkDfLhmgFOXAU",
   authDomain: "flight-scheduler-3daea.firebaseapp.com",
@@ -26,6 +26,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// تسجيل الدخول
 window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -37,14 +38,17 @@ window.login = async function () {
   }
 };
 
+// تسجيل الخروج
 window.logout = function () {
   signOut(auth).then(() => {
     window.location.href = "index.html";
   });
 };
 
+// البريد الخاص بالمشرف
 const adminEmail = "ahmedaltalqani@gmail.com";
 
+// متابعة حالة المستخدم
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -64,6 +68,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// عرض بطاقات الرحلات
 function renderFlightCards() {
   const fields = [
     { key: 'date', label: 'التاريخ' },
@@ -107,6 +112,7 @@ function renderFlightCards() {
   }
 }
 
+// تعيين اسم المستخدم تلقائيًا
 function setUserNameField() {
   const storedName = localStorage.getItem("userFullName");
   if (!storedName) {
@@ -120,6 +126,7 @@ function setUserNameField() {
   });
 }
 
+// استعادة الرحلات من التخزين المؤقت
 function restoreCachedFlights() {
   const cachedData = localStorage.getItem("cachedFlights");
   if (!cachedData) return;
@@ -132,6 +139,7 @@ function restoreCachedFlights() {
   });
 }
 
+// حفظ الرحلات
 window.saveFlights = async function () {
   const user = auth.currentUser;
   if (!user) return;
@@ -173,7 +181,7 @@ window.saveFlights = async function () {
   }
 };
 
-// دالة التصدير إلى PDF
+// تصدير PDF
 window.exportToPDF = function () {
   const cards = document.querySelectorAll(".card");
   const content = [];
@@ -183,6 +191,16 @@ window.exportToPDF = function () {
     const data = Array.from(inputs).map(input => `${input.name}: ${input.value}`);
     content.push({ text: `الرحلة ${index + 1}\n${data.join("\n")}`, margin: [0, 0, 0, 10] });
   });
+
+  // 🔠 دعم الخط العربي Amiri
+  pdfMake.fonts = {
+    Amiri: {
+      normal: 'Amiri-Regular.ttf',
+      bold: 'Amiri-Regular.ttf',
+      italics: 'Amiri-Regular.ttf',
+      bolditalics: 'Amiri-Regular.ttf'
+    }
+  };
 
   const docDefinition = {
     content,
