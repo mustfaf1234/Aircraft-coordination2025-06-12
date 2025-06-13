@@ -4,13 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>رحلات اليوم</title>
-
-  <!-- ملف التنسيق -->
   <link rel="stylesheet" href="css/style.css" />
-
-  <!-- مكتبة pdfMake الداعمة للعربية -->
-  <script src="https://cdn.jsdelivr.net/gh/MrRio/pdfmake/build/pdfmake.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/MrRio/pdfmake/build/vfs_fonts.js"></script>
+  
+  <!-- مكتبة pdfMake مضمونة -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
 </head>
 <body>
   <header>
@@ -28,14 +26,13 @@
       <button class="save" onclick="exportToPDF()">📄 تصدير PDF</button>
     </div>
 
-    <!-- لعرض الرحلات السابقة (جديدة) -->
-    <section>
-      <h2>الرحلات السابقة</h2>
-      <div id="previous-flights"></div>
+    <section id="previous-flights">
+      <h3>الرحلات السابقة</h3>
+      <div id="savedFlightsList"></div>
     </section>
   </main>
 
-  <!-- ربط سكربت التطبيق -->
+  <!-- ربط كود التطبيق -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
