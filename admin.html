@@ -1,4 +1,3 @@
-<!-- admin.html (لوحة المشرف) -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -14,17 +13,20 @@
     <div id="username">مرحباً، مشرف</div>
     <button class="logout" onclick="logout()">خروج</button>
   </header>
+
   <main>
     <section>
       <h2>إحصائيات الرحلات حسب المستخدم</h2>
       <div id="monthlyCounts"></div>
       <button class="save" onclick="exportAdminPDF()">📄 تصدير الإحصائيات PDF</button>
     </section>
+
     <section>
       <h2>جميع رحلات المستخدمين</h2>
       <div id="allFlightsList"></div>
     </section>
   </main>
+
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
