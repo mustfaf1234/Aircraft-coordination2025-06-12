@@ -1,4 +1,3 @@
-// admin.js (مُحدث بدون خط Amiri)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -108,10 +107,11 @@ window.exportAdminPDF = function () {
 
   const docDefinition = {
     content: [
-      { text: "إحصائيات الرحلات حسب المستخدم", style: "header" },
+      { text: "Flight Statistics by User", style: "header" },
       { text: text, style: "body" }
     ],
     defaultStyle: {
+      fontSize: 12,
       alignment: "right"
     },
     styles: {
@@ -120,5 +120,5 @@ window.exportAdminPDF = function () {
     }
   };
 
-  pdfMake.createPdf(docDefinition).download("إحصائيات_الرحلات.pdf");
+  pdfMake.createPdf(docDefinition).download("Flight_Statistics.pdf");
 };
