@@ -1,5 +1,4 @@
-// app.js (محدث على مشروع Firebase الجديد)
-
+// 🔧 app.js (مُحدث)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -14,7 +13,7 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// إعداد Firebase الجديد
+// إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyAiU4-PvYgqnWbVLgISz73P9D4HaSIhW-o",
   authDomain: "abcd-3b894.firebaseapp.com",
@@ -28,7 +27,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// تسجيل الدخول
 window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -40,7 +38,6 @@ window.login = async function () {
   }
 };
 
-// تسجيل الخروج
 window.logout = function () {
   signOut(auth).then(() => {
     window.location.href = "index.html";
@@ -136,7 +133,7 @@ function restoreCachedFlights() {
   });
 }
 
-window.saveFlights = async function () {
+window.saveAndExport = async function () {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -170,15 +167,15 @@ window.saveFlights = async function () {
 
   if (savedCount > 0) {
     localStorage.removeItem("cachedFlights");
-    alert(`✅ تم حفظ ${savedCount} رحلة`);
+    exportToPDF();
+    alert("✅ تم الحفظ والتصدير بنجاح");
   } else {
     localStorage.setItem("cachedFlights", JSON.stringify(allData));
     alert("⚠️ لم يتم حفظ أي رحلة بدون تاريخ.");
   }
 };
 
-// تصدير PDF بدون خط عربي
-window.exportToPDF = function () {
+function exportToPDF() {
   const cards = document.querySelectorAll(".card");
   const content = [];
 
@@ -191,10 +188,9 @@ window.exportToPDF = function () {
   const docDefinition = {
     content,
     defaultStyle: {
-      fontSize: 12,
       alignment: "right"
     }
   };
 
   pdfMake.createPdf(docDefinition).download("رحلات_اليوم.pdf");
-};
+}
