@@ -1,4 +1,4 @@
-<!-- style.css (تنسيق الواجهة) -->
+/* style.css */
 body {
   font-family: 'Tahoma', sans-serif;
   background: #f4f4f4;
@@ -44,4 +44,10 @@ button.save {
   border-radius: 6px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
+}
+@media (max-width: 600px) {
+  .login-box, .actions, #cards, #savedFlightsList, #allFlightsList, #monthlyCounts {
+    padding: 10px;
+    max-width: 95%;
+  }
 }
