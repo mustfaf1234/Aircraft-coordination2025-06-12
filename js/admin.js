@@ -1,4 +1,3 @@
-// admin.js (مُحدث)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -11,6 +10,7 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
+// إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCqOK8dAsYVd3G5kv6rFbrkDfLhmgFOXAU",
   authDomain: "flight-scheduler-3daea.firebaseapp.com",
@@ -26,6 +26,7 @@ const auth = getAuth(app);
 
 const adminEmail = "ahmedaltalqani@gmail.com";
 
+// التحقق من صلاحية الدخول
 onAuthStateChanged(auth, async (user) => {
   if (!user || user.email !== adminEmail) {
     alert("❌ ليس لديك صلاحية دخول لوحة الإدارة.");
@@ -38,12 +39,14 @@ onAuthStateChanged(auth, async (user) => {
   await loadAllFlights();
 });
 
+// زر تسجيل الخروج
 window.logout = function () {
   signOut(auth).then(() => {
     window.location.href = "index.html";
   });
 };
 
+// تحميل إحصائيات الرحلات شهرياً
 async function loadMonthlyCounts() {
   const flightsRef = collection(db, "flights");
   const snapshot = await getDocs(flightsRef);
@@ -75,6 +78,7 @@ async function loadMonthlyCounts() {
   }
 }
 
+// تحميل جميع الرحلات
 async function loadAllFlights() {
   const flightsRef = collection(db, "flights");
   const snapshot = await getDocs(flightsRef);
@@ -96,9 +100,20 @@ async function loadAllFlights() {
   });
 }
 
+// تصدير PDF للإحصائيات مع دعم الخط العربي
 window.exportAdminPDF = function () {
   const container = document.getElementById("monthlyCounts");
   const text = container.innerText || "لا توجد بيانات.";
+
+  // ✅ تعريف الخط Amiri
+  pdfMake.fonts = {
+    Amiri: {
+      normal: 'Amiri-Regular.ttf',
+      bold: 'Amiri-Regular.ttf',
+      italics: 'Amiri-Regular.ttf',
+      bolditalics: 'Amiri-Regular.ttf'
+    }
+  };
 
   const docDefinition = {
     content: [
