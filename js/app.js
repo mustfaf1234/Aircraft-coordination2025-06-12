@@ -1,4 +1,3 @@
-// 🔧 app.js (محدث لتجاوز مشكلة Roboto-Regular.ttf)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -27,6 +26,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// تسجيل الدخول
 window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -38,6 +38,7 @@ window.login = async function () {
   }
 };
 
+// تسجيل الخروج
 window.logout = function () {
   signOut(auth).then(() => {
     window.location.href = "index.html";
@@ -46,7 +47,7 @@ window.logout = function () {
 
 const adminEmail = "ahmedaltalqani@gmail.com";
 
-// منع إعادة التوجيه غير المنضبط
+// التحقق من الجلسة
 onAuthStateChanged(auth, (user) => {
   const path = window.location.pathname;
 
@@ -68,6 +69,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// رسم واجهة الرحلات
 function renderFlightCards() {
   const fields = [
     { key: 'date', label: 'التاريخ' },
@@ -111,6 +113,7 @@ function renderFlightCards() {
   }
 }
 
+// إدخال اسم المستخدم
 function setUserNameField() {
   const storedName = localStorage.getItem("userFullName");
   if (!storedName) {
@@ -124,6 +127,7 @@ function setUserNameField() {
   });
 }
 
+// استرجاع الرحلات المخزونة
 function restoreCachedFlights() {
   const cachedData = localStorage.getItem("cachedFlights");
   if (!cachedData) return;
@@ -136,7 +140,7 @@ function restoreCachedFlights() {
   });
 }
 
-// زر الحفظ والتصدير معاً
+// حفظ وتصدير الرحلات
 window.saveAndExport = async function () {
   const user = auth.currentUser;
   if (!user) return;
@@ -179,18 +183,8 @@ window.saveAndExport = async function () {
   }
 };
 
-// التصدير فقط
+// تصدير إلى PDF
 function exportToPDF() {
-  // ✅ إلغاء الاعتماد على Roboto-Regular
-  pdfMake.fonts = {
-    Roboto: {
-      normal: undefined,
-      bold: undefined,
-      italics: undefined,
-      bolditalics: undefined
-    }
-  };
-
   const cards = document.querySelectorAll(".card");
   const content = [];
 
@@ -203,6 +197,7 @@ function exportToPDF() {
   const docDefinition = {
     content,
     defaultStyle: {
+      font: "Helvetica", // ✅ حل نهائي لمشكلة Roboto
       alignment: "right"
     }
   };
