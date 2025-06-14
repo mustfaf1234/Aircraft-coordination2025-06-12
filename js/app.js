@@ -1,4 +1,5 @@
-// ✅ app.js (مُحدَّث)
+// app.js (محدث على مشروع Firebase الجديد)
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -13,19 +14,21 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
+// إعداد Firebase الجديد
 const firebaseConfig = {
-  apiKey: "AIzaSyCqOK8dAsYVd3G5kv6rFbrkDfLhmgFOXAU",
-  authDomain: "flight-scheduler-3daea.firebaseapp.com",
-  projectId: "flight-scheduler-3daea",
-  storageBucket: "flight-scheduler-3daea.appspot.com",
-  messagingSenderId: "1036581965112",
-  appId: "1:1036581965112:web:0bd21e436764ea4294c5cd"
+  apiKey: "AIzaSyAiU4-PvYgqnWbVLgISz73P9D4HaSIhW-o",
+  authDomain: "abcd-3b894.firebaseapp.com",
+  projectId: "abcd-3b894",
+  storageBucket: "abcd-3b894.firebasestorage.app",
+  messagingSenderId: "41388459465",
+  appId: "1:41388459465:web:9c67ef67f0ad4810e55418"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// تسجيل الدخول
 window.login = async function () {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -37,6 +40,7 @@ window.login = async function () {
   }
 };
 
+// تسجيل الخروج
 window.logout = function () {
   signOut(auth).then(() => {
     window.location.href = "index.html";
@@ -44,6 +48,7 @@ window.logout = function () {
 };
 
 const adminEmail = "ahmedaltalqani@gmail.com";
+
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -172,6 +177,7 @@ window.saveFlights = async function () {
   }
 };
 
+// تصدير PDF بدون خط عربي
 window.exportToPDF = function () {
   const cards = document.querySelectorAll(".card");
   const content = [];
@@ -185,6 +191,7 @@ window.exportToPDF = function () {
   const docDefinition = {
     content,
     defaultStyle: {
+      fontSize: 12,
       alignment: "right"
     }
   };
