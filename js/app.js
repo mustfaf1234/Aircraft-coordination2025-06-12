@@ -1,3 +1,4 @@
+// 🔧 app.js (محدث لتجاوز مشكلة Roboto-Regular.ttf)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -45,7 +46,7 @@ window.logout = function () {
 
 const adminEmail = "ahmedaltalqani@gmail.com";
 
-// منع إعادة تحميل غير منتهي عند index.html
+// منع إعادة التوجيه غير المنضبط
 onAuthStateChanged(auth, (user) => {
   const path = window.location.pathname;
 
@@ -180,6 +181,16 @@ window.saveAndExport = async function () {
 
 // التصدير فقط
 function exportToPDF() {
+  // ✅ إلغاء الاعتماد على Roboto-Regular
+  pdfMake.fonts = {
+    Roboto: {
+      normal: undefined,
+      bold: undefined,
+      italics: undefined,
+      bolditalics: undefined
+    }
+  };
+
   const cards = document.querySelectorAll(".card");
   const content = [];
 
