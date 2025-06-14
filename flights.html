@@ -1,3 +1,4 @@
+<!-- flights.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -5,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>رحلات اليوم</title>
   <link rel="stylesheet" href="css/style.css" />
+  <!-- مكتبة pdfMake -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 </head>
 <body>
@@ -18,8 +20,7 @@
     <h2>تسجيل الرحلات</h2>
     <div id="cards"></div>
     <div class="actions">
-      <button class="save" onclick="saveFlights()">💾 حفظ الرحلات</button>
-      <button class="save" onclick="exportToPDF()">📄 تصدير PDF</button>
+      <button class="save" onclick="saveAndExport()">💾📄 حفظ وتصدير PDF</button>
     </div>
     <section id="previous-flights">
       <h3>الرحلات السابقة</h3>
