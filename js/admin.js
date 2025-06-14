@@ -1,3 +1,5 @@
+// js/admin.js
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -10,14 +12,14 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// إعداد Firebase
+// إعداد Firebase - المشروع الجديد
 const firebaseConfig = {
-  apiKey: "AIzaSyCqOK8dAsYVd3G5kv6rFbrkDfLhmgFOXAU",
-  authDomain: "flight-scheduler-3daea.firebaseapp.com",
-  projectId: "flight-scheduler-3daea",
-  storageBucket: "flight-scheduler-3daea.appspot.com",
-  messagingSenderId: "1036581965112",
-  appId: "1:1036581965112:web:0bd21e436764ea4294c5cd"
+  apiKey: "AIzaSyAiU4-PvYgqnWbVLgISz73P9D4HaSIhW-o",
+  authDomain: "abcd-3b894.firebaseapp.com",
+  projectId: "abcd-3b894",
+  storageBucket: "abcd-3b894.appspot.com",
+  messagingSenderId: "41388459465",
+  appId: "1:41388459465:web:9c67ef67f0ad4810e55418"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -100,14 +102,14 @@ async function loadAllFlights() {
   });
 }
 
-// تصدير PDF للإحصائيات
+// تصدير PDF للإحصائيات بدون خط خارجي
 window.exportAdminPDF = function () {
   const container = document.getElementById("monthlyCounts");
   const text = container.innerText || "لا توجد بيانات.";
 
   const docDefinition = {
     content: [
-      { text: "Flight Statistics by User", style: "header" },
+      { text: "إحصائيات الرحلات حسب المستخدم", style: "header" },
       { text: text, style: "body" }
     ],
     defaultStyle: {
@@ -120,5 +122,5 @@ window.exportAdminPDF = function () {
     }
   };
 
-  pdfMake.createPdf(docDefinition).download("Flight_Statistics.pdf");
+  pdfMake.createPdf(docDefinition).download("إحصائيات_الرحلات.pdf");
 };
