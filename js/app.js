@@ -1,4 +1,3 @@
-// 🔧 app.js (مُحدث)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -18,7 +17,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAiU4-PvYgqnWbVLgISz73P9D4HaSIhW-o",
   authDomain: "abcd-3b894.firebaseapp.com",
   projectId: "abcd-3b894",
-  storageBucket: "abcd-3b894.firebasestorage.app",
+  storageBucket: "abcd-3b894.appspot.com",
   messagingSenderId: "41388459465",
   appId: "1:41388459465:web:9c67ef67f0ad4810e55418"
 };
@@ -46,18 +45,21 @@ window.logout = function () {
 
 const adminEmail = "ahmedaltalqani@gmail.com";
 
+// منع إعادة تحميل غير منتهي عند index.html
 onAuthStateChanged(auth, (user) => {
-  if (!user) {
+  const path = window.location.pathname;
+
+  if (!user && !path.includes("index.html")) {
     window.location.href = "index.html";
-  } else {
+  } else if (user) {
     const usernameEl = document.getElementById("username");
     if (usernameEl) usernameEl.textContent = user.email;
 
-    if (user.email === adminEmail && window.location.pathname.includes("flights.html")) {
+    if (user.email === adminEmail && path.includes("flights.html")) {
       window.location.href = "admin.html";
     }
 
-    if (window.location.pathname.includes("flights.html")) {
+    if (path.includes("flights.html")) {
       renderFlightCards();
       restoreCachedFlights();
       setUserNameField();
@@ -133,6 +135,7 @@ function restoreCachedFlights() {
   });
 }
 
+// زر الحفظ والتصدير معاً
 window.saveAndExport = async function () {
   const user = auth.currentUser;
   if (!user) return;
@@ -175,6 +178,7 @@ window.saveAndExport = async function () {
   }
 };
 
+// التصدير فقط
 function exportToPDF() {
   const cards = document.querySelectorAll(".card");
   const content = [];
