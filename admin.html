@@ -6,9 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة الإدارة - شعبة التنسيق</title>
   <link rel="stylesheet" href="css/style.css">
-  <!-- مكتبة PDFMake مع الخط العربي -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-  <script src="js/vfs_fonts.js"></script>
 </head>
 <body>
   <header>
@@ -16,20 +14,17 @@
     <div id="username">مرحباً، مشرف</div>
     <button class="logout" onclick="logout()">خروج</button>
   </header>
-
   <main>
     <section>
       <h2>إحصائيات الرحلات حسب المستخدم</h2>
       <div id="monthlyCounts"></div>
       <button class="save" onclick="exportAdminPDF()">📄 تصدير الإحصائيات PDF</button>
     </section>
-
     <section>
       <h2>جميع رحلات المستخدمين</h2>
       <div id="allFlightsList"></div>
     </section>
   </main>
-
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
