@@ -1,43 +1,74 @@
-/* style.css */
+/* تنسيق عام */
 body {
   font-family: 'Tahoma', sans-serif;
   background: #f4f4f4;
   margin: 0;
   padding: 0;
+  direction: rtl;
 }
+
+/* رأس وتذييل الصفحة */
 header, footer {
   background-color: #004080;
   color: white;
   text-align: center;
   padding: 10px;
 }
-.login-box, .actions, #cards, #savedFlightsList, #allFlightsList, #monthlyCounts {
+
+/* صناديق المحتوى */
+.login-box,
+.actions,
+#cards,
+#savedFlightsList,
+#allFlightsList,
+#monthlyCounts {
   padding: 20px;
-  margin: auto;
+  margin: 20px auto;
   max-width: 600px;
   background: white;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
+
+/* تنسيق العناصر داخل النماذج */
 input, textarea, button {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin: 8px 0;
   box-sizing: border-box;
   border-radius: 6px;
   border: 1px solid #ccc;
+  font-size: 16px;
 }
+
+/* أزرار الحفظ والتصدير */
 button.save {
   background-color: #008000;
   color: white;
   border: none;
+  cursor: pointer;
 }
+
+button.logout {
+  background-color: #cc0000;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+/* بطاقة الرحلة */
 .card {
   border: 1px solid #ddd;
-  padding: 10px;
+  padding: 15px;
   margin-bottom: 15px;
   border-radius: 8px;
+  background-color: #fff;
 }
+
+/* عنصر رحلة محفوظة */
 .flight-item {
   background: #f9f9f9;
   padding: 10px;
@@ -45,9 +76,30 @@ button.save {
   margin-bottom: 10px;
   border: 1px solid #ccc;
 }
+
+/* مجموعة النموذج داخل البطاقة */
+.form-group {
+  margin-bottom: 10px;
+}
+
+/* العناوين */
+h2, h3, h4 {
+  color: #004080;
+}
+
+/* استجابة للشاشات الصغيرة */
 @media (max-width: 600px) {
-  .login-box, .actions, #cards, #savedFlightsList, #allFlightsList, #monthlyCounts {
+  .login-box,
+  .actions,
+  #cards,
+  #savedFlightsList,
+  #allFlightsList,
+  #monthlyCounts {
     padding: 10px;
     max-width: 95%;
+  }
+
+  input, textarea, button {
+    font-size: 14px;
   }
 }
