@@ -1,3 +1,4 @@
+// admin.js (مُحدث بدون خط Amiri)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -100,20 +101,10 @@ async function loadAllFlights() {
   });
 }
 
-// تصدير PDF للإحصائيات مع دعم الخط العربي
+// تصدير PDF للإحصائيات
 window.exportAdminPDF = function () {
   const container = document.getElementById("monthlyCounts");
   const text = container.innerText || "لا توجد بيانات.";
-
-  // ✅ تعريف الخط Amiri
-  pdfMake.fonts = {
-    Amiri: {
-      normal: 'Amiri-Regular.ttf',
-      bold: 'Amiri-Regular.ttf',
-      italics: 'Amiri-Regular.ttf',
-      bolditalics: 'Amiri-Regular.ttf'
-    }
-  };
 
   const docDefinition = {
     content: [
@@ -121,7 +112,6 @@ window.exportAdminPDF = function () {
       { text: text, style: "body" }
     ],
     defaultStyle: {
-      font: "Amiri",
       alignment: "right"
     },
     styles: {
