@@ -1,4 +1,4 @@
-// 🔧 app.js (محدث بدون خط Amiri - يدعم النص العربي بشكل طبيعي)
+// ✅ app.js (مُحدَّث)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
@@ -44,7 +44,6 @@ window.logout = function () {
 };
 
 const adminEmail = "ahmedaltalqani@gmail.com";
-
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -173,14 +172,13 @@ window.saveFlights = async function () {
   }
 };
 
-// ✅ تصدير PDF بدون خط Amiri لكن يدعم العربي تلقائيًا
 window.exportToPDF = function () {
   const cards = document.querySelectorAll(".card");
   const content = [];
 
   cards.forEach((card, index) => {
     const inputs = card.querySelectorAll("input, textarea");
-    const data = Array.from(inputs).map(input => `${input.previousSibling.textContent}: ${input.value}`);
+    const data = Array.from(inputs).map(input => `${input.name}: ${input.value}`);
     content.push({ text: `الرحلة ${index + 1}\n${data.join("\n")}`, margin: [0, 0, 0, 10] });
   });
 
