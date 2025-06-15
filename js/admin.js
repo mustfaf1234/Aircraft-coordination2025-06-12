@@ -51,7 +51,7 @@ async function loadAllFlights() {
 
   // هيكلنا الجديد: flights/{month}/{username}_{timestamp}_{i}
   // إذن: يجب قراءة جميع المستندات داخل collection "flights/{month}"
-  const monthRef = collection(db, `flights/${month}`);
+  const monthRef = collection(db, "flights", month);
   const userDocs = await getDocs(monthRef);
 
   let allFlights = [];
