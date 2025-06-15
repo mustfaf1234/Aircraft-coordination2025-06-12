@@ -236,7 +236,7 @@ async function loadPreviousFlights() {
   savedFlightsList.innerHTML = "جارٍ تحميل الرحلات...";
 
   // قراءة من "flights/{month}" وابحث عن مستندات تبدأ باسم المستخدم
-  const monthRef = collection(db, `flights/${month}`);
+const monthRef = collection(db, "flights", month);
   const querySnapshot = await getDocs(monthRef);
 
   let html = "";
