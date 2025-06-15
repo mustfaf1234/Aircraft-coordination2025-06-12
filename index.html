@@ -1,4 +1,4 @@
-<!-- index.html -->
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -29,13 +29,10 @@
     </footer>
   </main>
 
-  <!-- ربط السكربت بشكل صحيح -->
   <script type="module">
     import * as app from "./js/app.js";
     window.login = app.login;
     window.logout = app.logout;
-
-    // ربط الزر بدالة تسجيل الدخول
     document.getElementById("loginBtn").addEventListener("click", app.login);
   </script>
 </body>
