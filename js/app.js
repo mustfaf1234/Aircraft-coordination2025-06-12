@@ -176,11 +176,10 @@ window.saveAndExport = async function () {
           alignment: AlignmentType.LEFT,
         }),
         new Paragraph({
-          children: [
-            new TextRun({ text: "Airside Operations Dept", bold: true }),
-            new TextRun({ text: "
-Aircraft Coordination Unit", break: 1 }),
-          ],
+children: [
+  new TextRun({ text: "Airside Operations Dept", bold: true }),
+  new TextRun({ text: "Aircraft Coordination Unit", break: 1 })
+],                      
           alignment: AlignmentType.RIGHT,
         }),
         new Paragraph({ text: "", spacing: { after: 200 } }),
