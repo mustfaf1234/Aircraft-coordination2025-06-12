@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
-  collectionGroup,
-  getDocs,
+  collection,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
   getAuth,
@@ -10,7 +10,6 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-// إعدادات Firebase (نفس app.js)
 const firebaseConfig = {
   apiKey: "AIzaSyAiU4-PvYgqnWbVLgISz73P9D4HaSIhW-o",
   authDomain: "abcd-3b894.firebaseapp.com",
@@ -31,42 +30,45 @@ function logout() {
 }
 window.logout = logout;
 
-// التحقق من هوية المسؤول
+// تحقق من صلاحيات المسؤول
 onAuthStateChanged(auth, (user) => {
   if (!user || user.email !== adminEmail) {
     window.location.href = "index.html";
     return;
   }
-  document.getElementById("username").textContent = user.email;
+  const usernameEl = document.getElementById("username");
+  if (usernameEl) usernameEl.textContent = user.email;
   loadAllFlights();
 });
 
-// تحميل كل الرحلات من Firestore حسب الهيكلية الجديدة
 async function loadAllFlights() {
   const adminFlightList = document.getElementById("adminFlightList");
   const userStats = {};
   adminFlightList.innerHTML = "<div>جاري تحميل الرحلات...</div>";
 
-  // الشهر الحالي بصيغة YYYY-MM
   const now = new Date();
-  const monthPath = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-  // استخدم collectionGroup لجلب جميع رحلات هذا الشهر لكل المستخدمين
-  const flightsQuery = collectionGroup(db, monthPath);
-  const flightsSnap = await getDocs(flightsQuery);
+  // هيكلنا الجديد: flights/{month}/{username}_{timestamp}_{i}
+  // إذن: يجب قراءة جميع المستندات داخل collection "flights/{month}"
+  const monthRef = collection(db, `flights/${month}`);
+  const userDocs = await getDocs(monthRef);
 
   let allFlights = [];
   let total = 0;
 
-  flightsSnap.forEach(docSnap => {
-    const data = docSnap.data();
-    const pathSegments = docSnap.ref.path.split('/');
-    const userName = pathSegments[pathSegments.length - 2]; // اسم المستخدم هو اسم المجلد
-    allFlights.push({ ...data, name: userName });
-    if (!userStats[userName]) userStats[userName] = 0;
-    userStats[userName]++;
+  for (const userDoc of userDocs.docs) {
+    const data = userDoc.data();
+    // استخراج اسم المستخدم من اسم المستند
+    let name = "غير معروف";
+    try {
+      name = userDoc.id.split("_")[0];
+    } catch {}
+    allFlights.push({ ...data, name });
+    if (!userStats[name]) userStats[name] = 0;
+    userStats[name]++;
     total++;
-  });
+  }
 
   // عرض كل الرحلات في جدول
   if (allFlights.length === 0) {
@@ -125,9 +127,8 @@ async function loadAllFlights() {
   statsHtml += `</ul><div style="margin-top:7px">عدد الرحلات الكلي: <strong>${total}</strong></div>`;
   document.getElementById("userStats").innerHTML = statsHtml;
 
-  // زر تصدير الإحصائية
   document.getElementById("exportStats").onclick = function () {
-    exportStatsToWord(userStats, monthPath, total);
+    exportStatsToWord(userStats, month, total);
   };
 }
 
