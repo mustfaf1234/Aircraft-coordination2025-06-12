@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -22,24 +23,20 @@
         في حالة نسيان كلمة السر يرجى الاتصال بمسؤول الشعبة - السيد احمد الطالقاني
       </div>
     </section>
+
     <footer>
       <p>@جميع الحقوق محفوظة</p>
     </footer>
   </main>
 
-  <!-- ربط السكربت بشكل مباشر لتصدير الدوال -->
+  <!-- ربط السكربت بشكل صحيح -->
   <script type="module">
     import * as app from "./js/app.js";
     window.login = app.login;
     window.logout = app.logout;
-  </script>
-  <script type="module">
-  import * as app from "./js/app.js";
-  window.login = app.login;
-  window.logout = app.logout;
 
-  // ✅ ربط الزر بالكود
-  document.getElementById("loginBtn").addEventListener("click", app.login);
-</script>
+    // ربط الزر بدالة login
+    document.getElementById("loginBtn").addEventListener("click", app.login);
+  </script>
 </body>
 </html>
