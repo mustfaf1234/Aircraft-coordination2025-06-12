@@ -1,12 +1,11 @@
 // js/app.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
   collection,
   doc,
   setDoc,
-  addDoc,
+  getDocs,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
@@ -15,6 +14,7 @@ import {
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+import * as docx from "https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js";
 
 // إعدادات Firebase
 const firebaseConfig = {
@@ -32,7 +32,7 @@ const auth = getAuth(app);
 const adminEmail = "ahmedaltalqani@gmail.com";
 
 // تسجيل الدخول
-async function login() {
+export async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   try {
@@ -44,34 +44,35 @@ async function login() {
 }
 
 // تسجيل الخروج
-function logout() {
+export function logout() {
   signOut(auth).then(() => window.location.href = "index.html");
 }
+window.logout = logout;
 
-// مراقبة حالة الدخول للمستخدم العادي أو المسؤول
+// مراقبة المستخدم (وحماية صفحات المسؤول)
 onAuthStateChanged(auth, (user) => {
   if (!user) return;
-  const path = window.location.pathname;
   const name = localStorage.getItem("userFullName") || user.email;
+  const path = window.location.pathname;
 
-  // تحويل المسؤول إلى صفحة الإدارة
+  // تحويل المسؤول إلى لوحة التحكم الخاصة به
   if (user.email === adminEmail && path.includes("flights")) {
     window.location.href = "admin.html";
-    return;
   }
 
   // عرض اسم المستخدم في الواجهة
   const usernameEl = document.getElementById("username");
   if (usernameEl) usernameEl.textContent = name;
 
-  // توليد بطاقات الرحلات عند الدخول على صفحة الرحلات
+  // إذا صفحة الرحلات
   if (path.includes("flights")) {
     renderFlightCards();
     setUserName();
+    loadPreviousFlights();
   }
 });
 
-// توليد بطاقات الرحلات (5 بطاقات في كل صفحة)
+// رسم بطاقات الرحلات (5 بطاقات)
 function renderFlightCards() {
   const fields = [
     'date', 'flightNo', 'onChocks', 'openDoor', 'startCleaning', 'completeCleaning',
@@ -106,7 +107,7 @@ function renderFlightCards() {
   }
 }
 
-// حفظ اسم المستخدم في LocalStorage
+// تعيين اسم المستخدم
 function setUserName() {
   let name = localStorage.getItem("userFullName");
   if (!name) {
@@ -120,7 +121,7 @@ function setUserName() {
   document.querySelectorAll("input[name='name']").forEach(input => input.value = name);
 }
 
-// حفظ وتصدير الرحلات إلى Word (الحفظ مصحح)
+// حفظ وتصدير الرحلات (وتخزينها في Firestore)
 window.saveAndExport = async function () {
   const user = auth.currentUser;
   if (!user) return;
@@ -136,8 +137,7 @@ window.saveAndExport = async function () {
     return;
   }
 
-  // استدعاء مكتبة docx من window (بعد تحميلها في html)
-  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType } = window.docx;
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, WidthType } = docx;
 
   const headers = [
     "FLT.NO", "ON chocks", "Open Door", "Start Cleaning", "Complete Cleaning",
@@ -165,9 +165,8 @@ window.saveAndExport = async function () {
     data.createdAt = serverTimestamp();
     data.createdBy = user.email;
 
-    // الحل الصحيح لحفظ المستندات في firestore
-    const userFlightsCol = collection(db, `flights/${month}/${username}`);
-    await addDoc(userFlightsCol, data);
+    // تخزين الرحلة كمستند داخل flights/{month}
+    await setDoc(doc(db, `flights/${month}/${username}_${Date.now()}_${i}`), data);
     saved++;
 
     rows.push(new TableRow({
@@ -218,11 +217,36 @@ window.saveAndExport = async function () {
 
   if (saved > 0) {
     alert("✅ تم حفظ وتصدير الرحلات بنجاح.");
+    loadPreviousFlights(); // إعادة تحميل الرحلات السابقة بعد الحفظ
   } else {
     alert("⚠️ تأكد من ملء التاريخ والاسم لكل رحلة.");
   }
 };
 
-// دوال الدخول والخروج على window حتى تشتغل من HTML
-window.login = login;
-window.logout = logout;
+// دالة جلب وعرض الرحلات السابقة
+async function loadPreviousFlights() {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const username = localStorage.getItem("userFullName") || user.email;
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const savedFlightsList = document.getElementById("savedFlightsList");
+  if (!savedFlightsList) return;
+  savedFlightsList.innerHTML = "جارٍ تحميل الرحلات...";
+
+  // قراءة من "flights/{month}" وابحث عن مستندات تبدأ باسم المستخدم
+  const monthRef = collection(db, `flights/${month}`);
+  const querySnapshot = await getDocs(monthRef);
+
+  let html = "";
+  querySnapshot.forEach((doc) => {
+    if (!doc.id.startsWith(username)) return;
+    const data = doc.data();
+    html += `<div class="prev-flight">
+      <strong>${data.flightNo || ""}</strong> | ${data.date || ""} | ${data.notes || ""}
+    </div>`;
+  });
+
+  savedFlightsList.innerHTML = html || "لا توجد رحلات سابقة.";
+}
