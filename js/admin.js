@@ -1,11 +1,8 @@
-// js/admin.js
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
-  collection,
+  collectionGroup,
   getDocs,
-  listCollections
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
   getAuth,
@@ -49,56 +46,35 @@ async function loadAllFlights() {
   const adminFlightList = document.getElementById("adminFlightList");
   const userStats = {};
   adminFlightList.innerHTML = "<div>جاري تحميل الرحلات...</div>";
-  
+
   // الشهر الحالي بصيغة YYYY-MM
   const now = new Date();
   const monthPath = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const monthCol = collection(db, "flights", monthPath);
-  
+
+  // استخدم collectionGroup لجلب جميع رحلات هذا الشهر لكل المستخدمين
+  const flightsQuery = collectionGroup(db, monthPath);
+  const flightsSnap = await getDocs(flightsQuery);
+
   let allFlights = [];
   let total = 0;
-  
-  // جلب جميع مجلدات المستخدمين داخل هذا الشهر
-  // نحتاج استخدام listCollections (غير متوفرة دائماً في إصدار 9.6.1، سنستخدم حل بديل)
-  // لذا نجرب الحصول على أسماء المستخدمين أولاً عبر محاولة قراءة جميع المجموعات الفرعية (users)
-  // سنفترض هنا أن المستخدمين هم أسماء مجلدات فرعية
-  
-  // نحاول نقرأ كل مجلد مستخدم داخل الشهر (collection group)
-  // نحصل على أسماء المستخدمين (collections الفرعية)
-  // الحل البديل: حدد أسماء المستخدمين يدوياً إذا أردت أو حدث الكود في حال أردت تحسين الأداء
-  // لكن الكود التالي يعمل غالباً مع Firestore السحابي
-  
-  try {
-    // نحصل على جميع مجموعات المستخدمين داخل الشهر الحالي
-    const monthRef = collection(db, "flights", monthPath);
-    const userCollections = await listCollections(monthRef);
-    
-    for (const userCol of userCollections) {
-      const userName = userCol.id;
-      const flightsSnap = await getDocs(collection(db, "flights", monthPath, userName));
-      userStats[userName] = 0;
-      
-      flightsSnap.forEach(docSnap => {
-        const data = docSnap.data();
-        allFlights.push({ ...data, name: userName });
-        userStats[userName]++;
-        total++;
-      });
-    }
-  } catch (err) {
-    // إذا كانت listCollections غير متوفرة (في بعض إصدارات firebase)، استخدم حل fallback يدوي
-    adminFlightList.innerHTML = "<div style='color:red'>لا يمكن قراءة مجلدات المستخدمين لهذا الشهر تلقائيًا، يرجى تحديث firebase أو إرسال أسماء المستخدمين يدوياً.</div>";
-    document.getElementById("userStats").innerHTML = "";
-    return;
-  }
-  
+
+  flightsSnap.forEach(docSnap => {
+    const data = docSnap.data();
+    const pathSegments = docSnap.ref.path.split('/');
+    const userName = pathSegments[pathSegments.length - 2]; // اسم المستخدم هو اسم المجلد
+    allFlights.push({ ...data, name: userName });
+    if (!userStats[userName]) userStats[userName] = 0;
+    userStats[userName]++;
+    total++;
+  });
+
   // عرض كل الرحلات في جدول
   if (allFlights.length === 0) {
     adminFlightList.innerHTML = "<div style='color:red'>لا توجد رحلات لهذا الشهر.</div>";
     document.getElementById("userStats").innerHTML = "";
     return;
   }
-  
+
   let table = `<table style="width:100%;margin-bottom:28px;border-collapse:collapse;">
     <thead>
       <tr>
@@ -117,7 +93,7 @@ async function loadAllFlights() {
         <th>ملاحظات</th>
       </tr>
     </thead><tbody>`;
-  
+
   for (const flight of allFlights) {
     table += `
       <tr>
@@ -137,10 +113,10 @@ async function loadAllFlights() {
       </tr>
     `;
   }
-  
+
   table += "</tbody></table>";
   adminFlightList.innerHTML = table;
-  
+
   // عرض إحصائيات المستخدمين
   let statsHtml = "<ul style='padding-right:12px'>";
   for (const user in userStats) {
@@ -148,9 +124,9 @@ async function loadAllFlights() {
   }
   statsHtml += `</ul><div style="margin-top:7px">عدد الرحلات الكلي: <strong>${total}</strong></div>`;
   document.getElementById("userStats").innerHTML = statsHtml;
-  
+
   // زر تصدير الإحصائية
-  document.getElementById("exportStats").onclick = function() {
+  document.getElementById("exportStats").onclick = function () {
     exportStatsToWord(userStats, monthPath, total);
   };
 }
@@ -158,7 +134,7 @@ async function loadAllFlights() {
 // تصدير الإحصائيات إلى Word
 function exportStatsToWord(userStats, month, total) {
   const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType } = window.docx;
-  
+
   const rows = [
     new TableRow({
       children: [
@@ -167,7 +143,7 @@ function exportStatsToWord(userStats, month, total) {
       ]
     })
   ];
-  
+
   for (const user in userStats) {
     rows.push(new TableRow({
       children: [
@@ -176,7 +152,7 @@ function exportStatsToWord(userStats, month, total) {
       ]
     }));
   }
-  
+
   const docFile = new Document({
     sections: [{
       properties: { page: { size: { orientation: "landscape" } } },
@@ -193,7 +169,7 @@ function exportStatsToWord(userStats, month, total) {
       ]
     }]
   });
-  
+
   Packer.toBlob(docFile).then(blob => {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
