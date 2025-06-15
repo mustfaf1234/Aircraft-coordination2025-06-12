@@ -10,25 +10,20 @@
 <body>
   <header>
     <h3>لوحة تحكم المسؤول</h3>
-    <span id="adminUsername" style="font-size: 14px;"></span>
+    <span id="username" style="font-size:14px"></span>
     <button class="logout" onclick="logout()">خروج</button>
   </header>
-
   <main>
-    <section>
-      <h2>جميع رحلات المستخدمين</h2>
-      <div id="adminFlightList"></div>
-    </section>
-    <section style="margin-top:32px;">
-      <h3>إحصائيات الشهر الحالي</h3>
-      <div id="userStats"></div>
-      <button id="exportStats" class="save" style="margin-top:18px;">تصدير الإحصائية إلى Word</button>
-    </section>
+    <h2>جميع رحلات المستخدمين</h2>
+    <div id="adminFlightList"></div>
+    <h3>إحصائيات الشهر الحالي</h3>
+    <div id="userStats"></div>
+    <button id="exportStats" class="export-btn">تصدير الإحصائية إلى Word</button>
   </main>
 
-  <!-- مكتبة docx لتصدير Word -->
+  <!-- مكتبة تصدير Word -->
   <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
-  <!-- سكربت الإدارة -->
+  <!-- سكربت المسؤول -->
   <script type="module" src="js/admin.js"></script>
 </body>
 </html>
