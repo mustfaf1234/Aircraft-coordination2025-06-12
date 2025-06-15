@@ -42,7 +42,7 @@ export async function login() {
     alert("فشل تسجيل الدخول: " + err.message);
   }
 }
-
+window.login = login;
 // تسجيل الخروج
 export function logout() {
   signOut(auth).then(() => window.location.href = "index.html");
